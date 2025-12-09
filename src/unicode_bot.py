@@ -1,15 +1,11 @@
 import json
 import os
-import unicodedata
 from random import choice
+import time
+import unicodedata
 
 from dotenv import load_dotenv
 from atproto import Client
-
-load_dotenv()
-
-client = Client()
-client.login(os.environ["BLUESKY_USERNAME"], os.environ["BLUESKY_PASSWORD"])
 
 
 def generate_valid_unicode(dump : bool = False) -> list[int]:
@@ -35,12 +31,28 @@ def load_valid_unicode() -> list[int]:
     return valid_codes
 
 
-valid_codes = load_valid_unicode()
+def post_random_unicode(client: Client):
+    valid_codes = load_valid_unicode()
+    rando = choice(valid_codes)
+    char = chr(rando)
+    name = unicodedata.name(char)
+    try:
+        client.post(char)
+    except Exception as e:
+        print(f"Failed! Tried to post U+{rando:04X}: {char} - {name}")
+        print(e)
+    else:
+        print(f"Success! Posted U+{rando:04X}: {char} - {name}")
 
-rando = choice(valid_codes)
-# print(f"U+{cp:04X}: {char} - {name}")
-print(unicodedata.name(chr(rando)))
-try:
-    client.post(chr(rando))
-except Exception as e:
-    print(e)
+
+def log_in_and_post():
+    load_dotenv()
+
+    client = Client()
+    client.login(os.environ["BLUESKY_USERNAME"], os.environ["BLUESKY_PASSWORD"])
+    while True:
+        post_random_unicode(client)
+        time.sleep(60*60)
+
+
+log_in_and_post()
