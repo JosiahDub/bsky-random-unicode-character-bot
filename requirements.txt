@@ -1,0 +1,2 @@
+atproto==0.0.63
+python-dotenv==1.2.1
